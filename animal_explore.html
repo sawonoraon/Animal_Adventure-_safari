@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animal Names Safari</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background: radial-gradient(circle, #e8f5e9, #81c784);
+            font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            user-select: none;
+        }
+
+        #music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            padding: 15px 25px;
+            font-size: 20px;
+            background: #ffeb3b;
+            border: 4px solid #fbc02d;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #fbc02d;
+        }
+
+        .title-prompt {
+            position: absolute;
+            top: 30px;
+            text-align: center;
+            color: #1b5e20;
+            pointer-events: none;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px white;
+        }
+
+        .animal-pop {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+            animation: giantFloat 3s ease-out forwards;
+        }
+
+        .emoji {
+            font-size: 200px;
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.1));
+        }
+
+        .name-label {
+            font-size: 40px;
+            color: #ffffff;
+            background: #2e7d32;
+            padding: 12px 40px;
+            border-radius: 50px;
+            border: 6px solid #a5d6a7;
+            margin-top: -20px;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @keyframes giantFloat {
+            0% { transform: scale(0) rotate(-15deg); opacity: 0; }
+            15% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+            85% { transform: scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: scale(0.7) translateY(-350px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <button id="music-control">🎵 Play Nature Sounds</button>
+    <div class="title-prompt">🌟 Tap to find an animal! 🌟</div>
+
+    <audio id="bg-music" loop>
+        <source src="https://www.soundjay.com/nature/sounds/rain-forest-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const musicBtn = document.getElementById('music-control');
+        const bgMusic = document.getElementById('bg-music');
+        let isPlaying = false;
+
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!isPlaying) { bgMusic.play(); musicBtn.innerText = "🔇 Stop Music"; isPlaying = true; }
+            else { bgMusic.pause(); musicBtn.innerText = "🎵 Play Nature Sounds"; isPlaying = false; }
+        });
+
+        const animalMap = {
+            '🦁': 'Lion', '🐯': 'Tiger', '🦒': 'Giraffe', '🦊': 'Fox', '🐨': 'Koala', 
+            '🐼': 'Panda', '🐻': 'Bear', '🐮': 'Cow', '🐷': 'Pig', '🐸': 'Frog', 
+            '🐵': 'Monkey', '🐔': 'Chicken', '🐧': 'Penguin', '🐦': 'Bird', '🐤': 'Chick', 
+            '🦆': 'Duck', '🦅': 'Eagle', '🦉': 'Owl', '🦇': 'Bat', '🐺': 'Wolf', 
+            '🐴': 'Horse', '🦄': 'Unicorn', '🐝': 'Bee', '🐛': 'Caterpillar', '🦋': 'Butterfly', 
+            '🐌': 'Snail', '🐞': 'Ladybug', '🐜': 'Ant', '🐢': 'Turtle', '🐍': 'Snake', 
+            'Rex': 'T-Rex', '🦕': 'Dino', '🐙': 'Octopus', '🦑': 'Squid', '🦐': 'Shrimp', 
+            '🦀': 'Crab', '🐡': 'Pufferfish', '🐠': 'Fish', '🐬': 'Dolphin', '🐳': 'Whale', 
+            '🦈': 'Shark', '🐊': 'Crocodile', '🐅': 'Tiger', '🐆': 'Leopard', '🦓': 'Zebra', 
+            '🦍': 'Gorilla', '🐘': 'Elephant', '🦛': 'Hippo', '🦏': 'Rhino', '🐪': 'Camel', 
+            '🦘': 'Kangaroo', '🦥': 'Sloth', '🦦': 'Otter', '🦨': 'Skunk', '🐁': 'Mouse', 
+            '🐰': 'Rabbit', '🐿': 'Squirrel', '🦔': 'Hedgehog', '🦃': 'Turkey', '🦚': 'Peacock',
+            'Parrot': 'Parrot', '🦢': 'Swan', '🦩': 'Flamingo', '🦗': 'Cricket', '🕷': 'Spider'
+        };
+
+        const icons = Object.keys(animalMap);
+        const roarSounds = [
+            'https://www.orangefreesounds.com/wp-content/uploads/2014/09/Lion-roar.mp3',
+            'https://www.orangefreesounds.com/wp-content/uploads/2014/11/Elephant-trumpeting-sound.mp3',
+            'https://www.orangefreesounds.com/wp-content/uploads/2020/06/Tyrannosaurus-rex-roar.mp3'
+        ];
+
+        // NEW: Function to handle Pronunciation
+        function pronounceName(text) {
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = text;
+            msg.rate = 0.9;  // Slightly slower for children
+            msg.pitch = 1.1; // Cheerful pitch
+            msg.volume = 1.0;
+            window.speechSynthesis.speak(msg);
+        }
+
+        document.addEventListener('click', (e) => {
+            const char = icons[Math.floor(Math.random() * icons.length)];
+            const name = animalMap[char];
+            const soundUrl = roarSounds[Math.floor(Math.random() * roarSounds.length)];
+
+            // 1. Play Roar Sound Effect
+            const roar = new Audio(soundUrl);
+            roar.volume = 0.2; // Lower volume so the voice is clear
+            roar.play();
+
+            // 2. Pronounce the Animal Name
+            pronounceName(name);
+
+            // 3. Create Visual Pop-up
+            const div = document.createElement('div');
+            div.className = 'animal-pop';
+            div.style.left = (e.clientX - 100) + 'px';
+            div.style.top = (e.clientY - 100) + 'px';
+
+            div.innerHTML = `
+                <div class="emoji">${char}</div>
+                <div class="name-label">${name}</div>
+            `;
+
+            document.body.appendChild(div);
+
+            setTimeout(() => div.remove(), 3000);
+        });
+    </script>
+</body>
+</html>
